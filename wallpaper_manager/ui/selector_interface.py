@@ -64,10 +64,14 @@ class SelectorInterface(Gtk.Window):
         # Set up CSS for transparency
         self._setup_transparency_css()
         
-        # Connect key press event for Escape key
+        # Connect key press event for Escape and arrow keys
         key_controller = Gtk.EventControllerKey()
         key_controller.connect("key-pressed", self._on_key_pressed)
         self.add_controller(key_controller)
+        
+        # Track current selection for arrow key navigation
+        self._current_selection = 0
+        self._wallpapers_list = []
         
         logger.debug("Window configured for fullscreen transparency")
 
@@ -128,7 +132,7 @@ class SelectorInterface(Gtk.Window):
         logger.debug("Transparency CSS applied")
 
     def _build_ui(self):
-        """Build the complete UI structure - 3 rows max"""
+        """Build the complete UI structure - 3 rows with aligned columns"""
         # Main overlay container
         overlay = Gtk.Overlay()
         self.set_child(overlay)
@@ -139,31 +143,25 @@ class SelectorInterface(Gtk.Window):
         scrolled.set_vexpand(True)
         scrolled.set_hexpand(True)
         
-        # Main vertical container - exactly 3 rows
-        main_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=16)
-        main_box.set_valign(Gtk.Align.CENTER)
-        main_box.set_margin_top(40)
-        main_box.set_margin_bottom(40)
-        main_box.set_margin_start(40)
-        main_box.set_margin_end(40)
+        # Use Grid for proper alignment
+        self.grid = Gtk.Grid()
+        self.grid.set_row_spacing(16)
+        self.grid.set_column_spacing(16)
+        self.grid.set_halign(Gtk.Align.CENTER)
+        self.grid.set_valign(Gtk.Align.CENTER)
+        self.grid.set_margin_top(40)
+        self.grid.set_margin_bottom(40)
+        self.grid.set_margin_start(40)
+        self.grid.set_margin_end(40)
         
-        # Create exactly 3 horizontal rows
-        self.row1 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
-        self.row2 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
-        self.row3 = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=16)
-        
-        main_box.append(self.row1)
-        main_box.append(self.row2)
-        main_box.append(self.row3)
-        
-        scrolled.set_child(main_box)
+        scrolled.set_child(self.grid)
         overlay.set_child(scrolled)
         
         # Close hint overlay
         close_hint = self._create_close_hint()
         overlay.add_overlay(close_hint)
         
-        logger.debug("UI structure built - 3 rows")
+        logger.debug("UI structure built - Grid layout")
 
     def _create_close_hint(self) -> Gtk.Box:
         """Create close hint label overlay"""
@@ -179,7 +177,7 @@ class SelectorInterface(Gtk.Window):
         return hint_box
 
     def load_wallpapers(self):
-        """Load and display all wallpapers in 3 rows"""
+        """Load and display all wallpapers in 3-row grid"""
         logger.info("Loading wallpapers...")
         
         # Get current wallpaper ID
@@ -197,25 +195,34 @@ class SelectorInterface(Gtk.Window):
         
         logger.info(f"Loading {len(wallpapers)} wallpapers")
         
-        # Clear existing items from all rows
-        for row in [self.row1, self.row2, self.row3]:
-            child = row.get_first_child()
-            while child is not None:
-                next_child = child.get_next_sibling()
-                row.remove(child)
-                child = next_child
+        # Store wallpapers list for navigation
+        self._wallpapers_list = wallpapers
+        
+        # Find current selection index
+        if self.current_wallpaper_id:
+            for i, wp in enumerate(wallpapers):
+                if wp.id == self.current_wallpaper_id:
+                    self._current_selection = i
+                    break
+        
+        # Clear existing items from grid
+        child = self.grid.get_first_child()
+        while child is not None:
+            next_child = child.get_next_sibling()
+            self.grid.remove(child)
+            child = next_child
         
         # Memory optimization
         if len(wallpapers) > 100:
             self._clear_old_cache_entries(keep_recent=50)
         
-        # Distribute wallpapers across 3 rows
-        rows = [self.row1, self.row2, self.row3]
+        # Arrange in grid: 3 rows, items cycle through rows
         for i, wallpaper in enumerate(wallpapers):
-            row_index = i % 3  # Cycle through rows: 0, 1, 2, 0, 1, 2, ...
-            self._create_wallpaper_item(wallpaper, rows[row_index])
+            row = i % 3  # Row: 0, 1, 2, 0, 1, 2, ...
+            col = i // 3  # Column: increases every 3 items
+            self._create_wallpaper_item(wallpaper, row, col, i)
         
-        logger.info(f"Loaded {len(wallpapers)} wallpapers in 3 rows")
+        logger.info(f"Loaded {len(wallpapers)} wallpapers in grid")
     
     def _clear_old_cache_entries(self, keep_recent: int = 50):
         """
@@ -242,7 +249,7 @@ class SelectorInterface(Gtk.Window):
         """Show empty state message when no wallpapers exist"""
         empty_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=20)
         empty_box.set_halign(Gtk.Align.CENTER)
-        empty_box.set_hexpand(True)
+        empty_box.set_valign(Gtk.Align.CENTER)
         
         empty_label = Gtk.Label(label="No wallpapers")
         empty_label.add_css_class("title-1")
@@ -252,30 +259,38 @@ class SelectorInterface(Gtk.Window):
         hint_label.add_css_class("dim-label")
         empty_box.append(hint_label)
         
-        self.row2.append(empty_box)
+        # Center in middle row
+        self.grid.attach(empty_box, 0, 1, 1, 1)
 
-    def _create_wallpaper_item(self, wallpaper: Wallpaper, row: Gtk.Box):
+    def _create_wallpaper_item(self, wallpaper: Wallpaper, row: int, col: int, index: int):
         """
         Create a wallpaper item widget
         
         Args:
             wallpaper: Wallpaper instance to display
-            row: Which row to add to
+            row: Grid row (0, 1, or 2)
+            col: Grid column
+            index: Index in wallpapers list
         """
-        # Container box
+        # Container box - larger thumbnails
         item_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         item_box.add_css_class("niri-tile")
-        item_box.set_size_request(200, 120)
+        item_box.set_size_request(280, 180)
         
-        # Mark current wallpaper
+        # Store index for navigation
+        item_box.wallpaper_index = index
+        
+        # Mark current wallpaper or selected
         if wallpaper.id == self.current_wallpaper_id:
             item_box.add_css_class("current")
+        if index == self._current_selection:
+            item_box.add_css_class("selected")
         
         # Create picture widget
         picture = Gtk.Picture()
         picture.set_can_shrink(True)
         picture.set_content_fit(Gtk.ContentFit.COVER)
-        picture.set_size_request(200, 120)
+        picture.set_size_request(280, 180)
         
         # Load thumbnail
         self._load_thumbnail_cached(picture, wallpaper)
@@ -287,8 +302,8 @@ class SelectorInterface(Gtk.Window):
         gesture.connect("released", self._on_wallpaper_clicked, wallpaper)
         item_box.add_controller(gesture)
         
-        # Add to specified row
-        row.append(item_box)
+        # Add to grid at specified position
+        self.grid.attach(item_box, col, row, 1, 1)
     
     def _load_thumbnail_cached(self, picture: Gtk.Picture, wallpaper: Wallpaper):
         """
@@ -381,7 +396,59 @@ class SelectorInterface(Gtk.Window):
             self._on_close()
             return True
         
+        # Arrow key navigation
+        if not self._wallpapers_list:
+            return False
+        
+        old_selection = self._current_selection
+        
+        if keyval == Gdk.KEY_Up:
+            # Move up one row (subtract 1)
+            if self._current_selection > 0:
+                self._current_selection -= 1
+        elif keyval == Gdk.KEY_Down:
+            # Move down one row (add 1)
+            if self._current_selection < len(self._wallpapers_list) - 1:
+                self._current_selection += 1
+        elif keyval == Gdk.KEY_Left:
+            # Move left one column (subtract 3)
+            if self._current_selection >= 3:
+                self._current_selection -= 3
+        elif keyval == Gdk.KEY_Right:
+            # Move right one column (add 3)
+            if self._current_selection + 3 < len(self._wallpapers_list):
+                self._current_selection += 3
+        elif keyval == Gdk.KEY_Return or keyval == Gdk.KEY_KP_Enter:
+            # Enter key - select current wallpaper
+            if 0 <= self._current_selection < len(self._wallpapers_list):
+                wallpaper = self._wallpapers_list[self._current_selection]
+                self._on_wallpaper_clicked(None, 0, 0, 0, wallpaper)
+            return True
+        else:
+            return False
+        
+        # Update selection if changed
+        if old_selection != self._current_selection:
+            self._update_selection_highlight()
+            return True
+        
         return False
+    
+    def _update_selection_highlight(self):
+        """Update visual highlight for keyboard selection"""
+        # Remove old selection highlight
+        child = self.grid.get_first_child()
+        while child is not None:
+            child.remove_css_class("selected")
+            child = child.get_next_sibling()
+        
+        # Add new selection highlight
+        child = self.grid.get_first_child()
+        while child is not None:
+            if hasattr(child, 'wallpaper_index') and child.wallpaper_index == self._current_selection:
+                child.add_css_class("selected")
+                break
+            child = child.get_next_sibling()
 
     def _on_close(self):
         """Handle window close"""

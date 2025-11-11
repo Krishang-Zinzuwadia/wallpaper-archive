@@ -525,21 +525,32 @@ class ImportPopup(Gtk.Window):
         return preview_box
 
     def _create_action_bar(self) -> Gtk.Box:
-        """Create action bar with Confirm/Cancel buttons"""
+        """Create action bar with buttons"""
         action_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=10)
         action_box.add_css_class("action-bar")
         action_box.set_margin_top(0)
         action_box.set_margin_bottom(0)
         action_box.set_margin_start(0)
         action_box.set_margin_end(0)
-        action_box.set_halign(Gtk.Align.END)
         
-        # Cancel button
+        # See Your Wallpapers button (left side)
+        see_wallpapers_button = Gtk.Button(label="See Your Wallpapers")
+        see_wallpapers_button.connect("clicked", self._on_see_wallpapers)
+        see_wallpapers_button.set_halign(Gtk.Align.START)
+        see_wallpapers_button.set_hexpand(True)
+        action_box.append(see_wallpapers_button)
+        
+        # Spacer
+        spacer = Gtk.Box()
+        spacer.set_hexpand(True)
+        action_box.append(spacer)
+        
+        # Cancel button (right side)
         cancel_button = Gtk.Button(label="Cancel")
         cancel_button.connect("clicked", self._on_cancel)
         action_box.append(cancel_button)
         
-        # Confirm button
+        # Confirm button (right side)
         self.confirm_button = Gtk.Button(label="Confirm")
         self.confirm_button.connect("clicked", self._on_confirm)
         self.confirm_button.add_css_class("suggested-action")
@@ -585,6 +596,17 @@ class ImportPopup(Gtk.Window):
         logger.info(f"Successfully imported {len(successful_imports)} wallpapers")
         
         # Call the callback if provided
+        if self.on_confirm_callback:
+            self.on_confirm_callback()
+        
+        # Close the window
+        self.close()
+
+    def _on_see_wallpapers(self, button: Gtk.Button):
+        """Handle See Your Wallpapers button click"""
+        logger.info("See Your Wallpapers button clicked")
+        
+        # Call the callback to show selector interface
         if self.on_confirm_callback:
             self.on_confirm_callback()
         

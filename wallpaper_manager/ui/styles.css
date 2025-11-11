@@ -123,6 +123,10 @@ window.selector-interface {
     border-color: rgba(255, 255, 255, 0.4);
 }
 
+.niri-tile.selected {
+    border-color: #4a9eff;
+}
+
 .niri-tile.current {
     border-color: #4ade80;
 }
