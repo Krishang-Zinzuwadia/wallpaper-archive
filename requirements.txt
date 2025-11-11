@@ -1,0 +1,6 @@
+PyGObject>=3.42
+Pillow>=10.0
+requests>=2.31
+tomli>=2.0; python_version < '3.11'
+tomli-w>=1.0
+python-xlib>=0.33

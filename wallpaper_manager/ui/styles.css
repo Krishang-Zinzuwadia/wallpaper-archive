@@ -1,0 +1,186 @@
+/* Wallpaper Manager - Clean Modern UI */
+
+/* Import Popup */
+.import-popup {
+    background-color: #1a1a1a;
+}
+
+.import-popup-content {
+    background-color: #1a1a1a;
+}
+
+.import-header {
+    padding: 20px 24px;
+    background-color: #1a1a1a;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.import-header label {
+    color: #ffffff;
+    font-weight: 500;
+    font-size: 18px;
+}
+
+.mode-selector {
+    padding: 16px 24px;
+    background-color: #1a1a1a;
+}
+
+.mode-selector button {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: 400;
+    background-color: #2a2a2a;
+    color: #ffffff;
+    border: 1px solid #3a3a3a;
+}
+
+.mode-selector button:hover {
+    background-color: #3a3a3a;
+}
+
+.import-content-area {
+    padding: 24px;
+    min-height: 180px;
+    background-color: #1a1a1a;
+}
+
+.url-entry {
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 14px;
+    background-color: #2a2a2a;
+    color: #ffffff;
+    border: 1px solid #3a3a3a;
+}
+
+.url-entry:focus {
+    border-color: #4a9eff;
+}
+
+.preview-list {
+    background-color: #2a2a2a;
+    border-radius: 6px;
+    padding: 8px;
+}
+
+.preview-list row {
+    border-radius: 4px;
+    margin: 2px 0;
+}
+
+.preview-list row:hover {
+    background-color: #3a3a3a;
+}
+
+.preview-list .success {
+    color: #4ade80;
+}
+
+.preview-list .error {
+    color: #f87171;
+}
+
+.action-bar {
+    padding: 16px 24px;
+    background-color: #1a1a1a;
+    border-top: 1px solid #2a2a2a;
+}
+
+.action-bar button {
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-weight: 400;
+    background-color: #2a2a2a;
+    color: #ffffff;
+    border: 1px solid #3a3a3a;
+}
+
+.action-bar button:hover {
+    background-color: #3a3a3a;
+}
+
+.loading-indicator {
+    padding: 10px;
+    background-color: #2a2a2a;
+    border-radius: 6px;
+    border-left: 3px solid #4a9eff;
+}
+
+/* Selector Interface - Niri 3-Row Style */
+window.selector-interface {
+    background-color: transparent;
+}
+
+.niri-tile {
+    background-color: transparent;
+    border-radius: 6px;
+    border: 3px solid transparent;
+    transition: border-color 0.1s ease;
+}
+
+.niri-tile:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.niri-tile.current {
+    border-color: #4ade80;
+}
+
+.niri-tile.current:hover {
+    border-color: #4ade80;
+}
+
+.niri-tile picture {
+    border-radius: 4px;
+}
+
+.close-hint {
+    background-color: rgba(0, 0, 0, 0.8);
+    border-radius: 16px;
+    padding: 8px 20px;
+    margin: 20px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
+    font-weight: 400;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Buttons */
+button.suggested-action {
+    background-color: #4a9eff;
+    color: #ffffff;
+    font-weight: 500;
+    border: none;
+}
+
+button.suggested-action:hover {
+    background-color: #3a8eef;
+}
+
+button.suggested-action:disabled {
+    background-color: #2a2a2a;
+    color: #6a6a6a;
+    opacity: 0.6;
+}
+
+/* Scrollbar */
+scrollbar {
+    background-color: transparent;
+}
+
+scrollbar slider {
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+    min-width: 6px;
+    min-height: 6px;
+}
+
+scrollbar slider:hover {
+    background-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Spinner */
+spinner {
+    color: #4a9eff;
+}

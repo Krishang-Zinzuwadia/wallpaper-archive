@@ -1,0 +1,22 @@
+[Unit]
+Description=Wallpaper Manager Keyboard Shortcut Daemon
+Documentation=https://github.com/user/wallpaper-manager
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python -m wallpaper_manager.daemon
+Restart=on-failure
+RestartSec=5
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=%h/.Xauthority
+
+# Security hardening
+PrivateTmp=yes
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=%h/.local/share/wallpaper-manager %h/.config/wallpaper-manager
+
+[Install]
+WantedBy=default.target

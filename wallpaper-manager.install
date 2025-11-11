@@ -1,0 +1,48 @@
+post_install() {
+    echo "==> Wallpaper Manager has been installed successfully!"
+    echo ""
+    echo "==> To enable the keyboard shortcut daemon, run:"
+    echo "    systemctl --user enable --now wallpaper-manager-daemon.service"
+    echo ""
+    echo "==> The wallpaper storage directory will be created at:"
+    echo "    ~/.local/share/wallpaper-manager"
+    echo ""
+    echo "==> Press Win+Alt+W to launch the wallpaper manager"
+    echo ""
+    
+    # Note: We don't auto-enable the service to respect user choice
+    # The storage directory is created on first run by the application
+}
+
+post_upgrade() {
+    echo "==> Wallpaper Manager has been upgraded to version $2"
+    echo ""
+    echo "==> If the daemon is running, restart it with:"
+    echo "    systemctl --user restart wallpaper-manager-daemon.service"
+    echo ""
+}
+
+pre_remove() {
+    # Stop and disable the daemon if it's running
+    if systemctl --user is-active --quiet wallpaper-manager-daemon.service; then
+        echo "==> Stopping wallpaper-manager-daemon service..."
+        systemctl --user stop wallpaper-manager-daemon.service
+    fi
+    
+    if systemctl --user is-enabled --quiet wallpaper-manager-daemon.service; then
+        echo "==> Disabling wallpaper-manager-daemon service..."
+        systemctl --user disable wallpaper-manager-daemon.service
+    fi
+}
+
+post_remove() {
+    echo "==> Wallpaper Manager has been removed"
+    echo ""
+    echo "==> Your wallpaper collection is preserved at:"
+    echo "    ~/.local/share/wallpaper-manager"
+    echo ""
+    echo "==> To completely remove all data, run:"
+    echo "    rm -rf ~/.local/share/wallpaper-manager"
+    echo "    rm -rf ~/.config/wallpaper-manager"
+    echo ""
+}

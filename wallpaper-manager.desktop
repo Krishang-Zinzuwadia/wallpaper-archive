@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Wallpaper Manager
+GenericName=Wallpaper Manager
+Comment=Manage and switch desktop wallpapers with a modern interface
+Exec=wallpaper-manager
+Icon=preferences-desktop-wallpaper
+Terminal=false
+Categories=GTK;Utility;DesktopSettings;Settings;
+Keywords=wallpaper;background;desktop;image;theme;
+StartupNotify=false
+StartupWMClass=wallpaper-manager
