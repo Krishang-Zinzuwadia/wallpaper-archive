@@ -48,6 +48,8 @@ systemctl --user enable --now wallpaper-manager-daemon.service
 
 ## Usage
 
+cool
+
 ### Quick Start
 
 1. Press `Win+Alt+W` (Super+Alt+W) to open the wallpaper manager
